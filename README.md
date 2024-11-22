@@ -26,21 +26,18 @@ pak::pak("p-schaefer/datastreamr.helper")
 
 ## Example
 
-You can Set the API Key in the script, but a more secure solution is to
+You can set the API Key in the script, but a more secure solution is to
 save the API key as an environmental variable:
 
 ``` r
 library(datastreamr.helper)
 
 # To set API Key for the current session, use:
-# datastreamr::setAPIKey('xxxxxxxxxx')
+if (F) datastreamr::setAPIKey('xxxxxxxxxx')
 
 # Preferably, save the API key as an environmental variable
 # then there is no need to run datastreamr::setAPIKey('xxxxxxxxxx')
-usethis::edit_r_environ()
-#> ☐ Edit
-#>   'C:/Users/PatrickSchaefer/OneDrive - Datastream Initiative/Documents/.Renviron'.
-#> ☐ Restart R for changes to take effect.
+if (F) usethis::edit_r_environ()
 # add DATASTREAM_API_KEY="xxxxxxxxxx" to the file, save, and restart R
 
 # Setting the API key this means users never have to worry about setting the API key again
@@ -80,8 +77,6 @@ DS_valid$valid_filter
 
 ``` r
 
-DS_valid <- DS_valid_vals()
-
 # valid values for lookups
 DS_valid$valid_lookup$ActivityMediaName
 #> [1] "Ambient Air"              "Ocean Water"             
@@ -90,7 +85,13 @@ DS_valid$valid_lookup$ActivityMediaName
 #> [7] "Surface Water"            "Surface Water Sediment"
 ```
 
-Use standard R operators and formats for API queries with `qs_helper()`:
+The functions in datastreamr.helper accept standard R operators and
+formats (i.e., lists and vectors) for API queries with `qs_helper()`.
+The `filter` argument requires a named list, which elements name
+corresponding to the field to filter by (i.,
+`DS_valid$valid_filter[["metadata"]]`). The associated element can be a
+list or vector, but the first element of that object must be a standard
+R operator:
 
 ``` r
 
@@ -123,10 +124,11 @@ qs_helper(
 #> [1] "DOI eq '10.25976/0gvo-9d12' and CharacteristicName in ('Specific conductance', 'pH') and ActivityStartYear gt '2010' and LocationId eq '862774' and ActivityStartYear eq '2024'"
 ```
 
-Finally, `DS_helper()` will use the above functions to validate and
-format inputs into datastreamr endpoints. It will also split filters
-into separate queries if too many are specified, and iterate over values
-of `$top` in instances where the resulting query is too large.
+The `DS_helper()` function will use `qs_helper()` and `DS_valid_vals()`
+internally to validate and format inputs for the datastreamr endpoints.
+It will also split filters into separate queries if too many are
+specified, and iterate over values of `$top` in instances where the
+resulting query is too large.
 
 ``` r
 

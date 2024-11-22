@@ -1,6 +1,6 @@
 Package: datastreamr.helper
-Title: An Helper Package for datastreamr, the R Wrapper for DataStream's Public API
-Version: 0.0.0.9000
+Title: A Helper Package for datastreamr, the R Wrapper for DataStream's Public API
+Version: 0.0.1
 Authors@R: 
     person("Patrick", "Schaefer", , "patrick@datastream.org", role = c("aut", "cre"))
 Description: This package helps users make calls to DataStream's public API through datastreamr.
