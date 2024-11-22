@@ -88,7 +88,7 @@ DS_valid$valid_lookup$ActivityMediaName
 The functions in datastreamr.helper accept standard R operators and
 formats (i.e., lists and vectors) for API queries with `qs_helper()`.
 The `filter` argument requires a named list, which elements name
-corresponding to the field to filter by (i.,
+corresponding to the field to filter by (i.e.,
 `DS_valid$valid_filter[["metadata"]]`). The associated element can be a
 list or vector, but the first element of that object must be a standard
 R operator:
