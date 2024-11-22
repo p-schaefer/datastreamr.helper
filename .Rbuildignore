@@ -1,2 +1,4 @@
 ^datastreamr\.helper\.Rproj$
 ^\.Rproj\.user$
+^README\.Rmd$
+^LICENSE\.md$
