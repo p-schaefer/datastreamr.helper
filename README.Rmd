@@ -91,7 +91,7 @@ qs_helper(
 
 ```
 
-The `DS_helper()` function will use `qs_helper()` and `DS_valid_vals()` internally to validate and format inputs for the datastreamr endpoints. It will also split filters into separate queries if too many are specified, and iterate over values of `$top` in instances where the resulting query is too large.
+The `DS_helper()` function will use `qs_helper()` and `DS_valid_vals()` internally to validate and format inputs for the datastreamr endpoints (note that `qs_helper()` does not validate inputs, only formats them). It will also split filters into separate queries if too many are specified (maximum values specied by `.max_filt`), and iterate over values of `$top` (via `.top_list`) in instances where the resulting query is too large.
 
 ```{r DS_helper}
 
@@ -108,7 +108,6 @@ rec <- DS_helper(
   ep="records",
   select=c("MonitoringLocationID",
            "ActivityStartDate",
-           "ActivityStartTime",
            "CharacteristicName",
            "ResultUnit",
            "ResultValue",
@@ -124,4 +123,76 @@ rec <- DS_helper(
 )
 
 rec
+```
+
+Error examples:
+```{r DS_helper.error1}
+
+try(
+  DS_helper(
+    ep="records",
+    select=c("Incorrect_Column_Name",
+             "MonitoringLocationID",
+             "ActivityStartDate",
+             "CharacteristicName",
+             "ResultUnit",
+             "ResultValue",
+             "ResultDetectionCondition",
+             "ResultStatusID",
+             "ResultComment"),
+    filter=list(
+      DOI=c("==","10.25976/ori9-w562"),
+      CharacteristicName=c("%in%","Specific conductance","pH"),
+      ActivityStartYear=c(">=",2020),
+      LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
+    )
+  )
+)
+```
+
+```{r DS_helper.error2}
+
+try(
+  DS_helper(
+    ep="records",
+    select=c("MonitoringLocationID",
+             "ActivityStartDate",
+             "CharacteristicName",
+             "ResultUnit",
+             "ResultValue",
+             "ResultDetectionCondition",
+             "ResultStatusID",
+             "ResultComment"),
+    filter=list(
+      Incorrect_Column_Name=c("==","something_wrong"),
+      DOI=c("==","10.25976/ori9-w562"),
+      CharacteristicName=c("%in%","Specific conductance","pH"),
+      ActivityStartYear=c(">=",2020),
+      LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
+    )
+  )
+)
+```
+
+```{r DS_helper.error3}
+
+try(
+  DS_helper(
+    ep="records",
+    select=c("MonitoringLocationID",
+             "ActivityStartDate",
+             "CharacteristicName",
+             "ResultUnit",
+             "ResultValue",
+             "ResultDetectionCondition",
+             "ResultStatusID",
+             "ResultComment"),
+    filter=list(
+      DOI=c("==","10.25976/ori9-w562"),
+      CharacteristicName=c("%in%","Specific conductance","pH","something_wrong"),
+      ActivityStartYear=c(">=",2020),
+      LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
+    )
+  )
+)
 ```
