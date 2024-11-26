@@ -25,7 +25,7 @@
 #'            "CreateTimestamp"),
 #'   filter=list(
 #'            DOI=c("==","10.25976/0gvo-9d12"),
-#'            CharacteristicName=c("%in%","Specific conductance","pH"),
+#'            CharacteristicName=c("%in%",c("Specific conductance","pH")),
 #'            ActivityStartYear=c(">",2010),
 #'            LocationId=c("==","862774")
 #'            ),
@@ -77,7 +77,9 @@ qs_helper<-function(select=NULL,
                    function(fl) {
                      opr <- replace_table$api[replace_table$r==fl[[1]]]
                      if (is.null(opr) || length(opr)==0) stop("Invalid operator supplied to 'filter'")
-                     val <- lapply(fl[-c(1)],trimws)
+                     val <- unlist(fl[-c(1)])
+                     names(val) <- NULL
+                     val <- lapply(val,trimws)
                      val <- val[!sapply(val,is.na)]
                      val <- val[!sapply(val,function(x) x=="NA")]
                      if (is.null(val) || length(val)==0) return(NULL)

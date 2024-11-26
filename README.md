@@ -87,7 +87,7 @@ DS_valid$valid_lookup$ActivityMediaName
 
 The functions in datastreamr.helper accept standard R operators and
 formats (i.e., lists and vectors) for API queries with `qs_helper()`.
-The `filter` argument requires a named list, which elements name
+The `filter` argument requires a named list, with each elements name
 corresponding to the field to filter by (i.e.,
 `DS_valid$valid_filter[["metadata"]]`). The associated element can be a
 list or vector, but the first element of that object must be a standard
@@ -107,7 +107,7 @@ qs_helper(
            "CreateTimestamp"),
   filter=list(
     DOI=c("==","10.25976/0gvo-9d12"),
-    CharacteristicName=c("%in%","Specific conductance","pH"),
+    CharacteristicName=c("%in%",c("Specific conductance","pH")),
     ActivityStartYear=c(">",2010),
     LocationId=c("==","862774"),
     ActivityStartYear=c("==","2024")
@@ -138,7 +138,7 @@ loc <- DS_helper(
   ep="locations",
   filter=list(
     DOI=c("==","10.25976/ori9-w562"),
-    CharacteristicName=c("%in%","Specific conductance","pH"),
+    CharacteristicName=c("%in%",c("Specific conductance","pH")),
     ActivityStartYear=c(">=",2020)
   )
 )
@@ -155,7 +155,7 @@ rec <- DS_helper(
            "ResultComment"),
   filter=list(
     DOI=c("==","10.25976/ori9-w562"),
-    CharacteristicName=c("%in%","Specific conductance","pH"),
+    CharacteristicName=c("%in%",c("Specific conductance","pH")),
     ActivityStartYear=c(">=",2020),
     LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
   )
@@ -194,7 +194,7 @@ try(
              "ResultComment"),
     filter=list(
       DOI=c("==","10.25976/ori9-w562"),
-      CharacteristicName=c("%in%","Specific conductance","pH"),
+      CharacteristicName=c("%in%",c("Specific conductance","pH")),
       ActivityStartYear=c(">=",2020),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )
@@ -220,7 +220,7 @@ try(
     filter=list(
       Incorrect_Column_Name=c("==","something_wrong"),
       DOI=c("==","10.25976/ori9-w562"),
-      CharacteristicName=c("%in%","Specific conductance","pH"),
+      CharacteristicName=c("%in%",c("Specific conductance","pH")),
       ActivityStartYear=c(">=",2020),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )
@@ -245,7 +245,7 @@ try(
              "ResultComment"),
     filter=list(
       DOI=c("==","10.25976/ori9-w562"),
-      CharacteristicName=c("%in%","Specific conductance","pH","something_wrong"),
+      CharacteristicName=c("%in%",c("Specific conductance","pH","something_wrong")),
       ActivityStartYear=c(">=",2020),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )

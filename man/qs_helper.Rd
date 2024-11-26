@@ -36,7 +36,7 @@ qs_helper(
            "CreateTimestamp"),
   filter=list(
            DOI=c("==","10.25976/0gvo-9d12"),
-           CharacteristicName=c("\%in\%","Specific conductance","pH"),
+           CharacteristicName=c("\%in\%",c("Specific conductance","pH")),
            ActivityStartYear=c(">",2010),
            LocationId=c("==","862774")
            ),
