@@ -81,9 +81,9 @@ DS_helper <- function(ep=c("metadata","locations","observations","records"),
 
     # if (any(duplicated(names(filter)))) stop("Duplicate filters are not allowed")
 
-    filter<-filter[!sapply(filter,function(x) is.na(x[[1]]))]
-    filter<-filter[!sapply(filter,function(x) is.null(x[[2]]))]
-    filter<-filter[!sapply(filter,function(x) is.na(x[[2]]))]
+    filter<-filter[!sapply(filter,function(x) is.na(x[1]))]
+    filter<-filter[!sapply(filter,function(x) is.null(x[2]))]
+    filter<-filter[!sapply(filter,function(x) is.na(x[2]))]
     filter<-filter[!sapply(filter,is.null)]
     filter<-filter[!sapply(names(filter),is.na)]
     filter<-filter[!sapply(names(filter),is.null)]
