@@ -20,8 +20,8 @@ You can install the development version of datastreamr.helper from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("p-schaefer/datastreamr.helper")
+# install.packages("remotes")
+remotes::install_github("p-schaefer/datastreamr.helper")
 ```
 
 ## Example
