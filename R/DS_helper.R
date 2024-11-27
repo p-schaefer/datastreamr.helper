@@ -19,7 +19,7 @@
 #'   filter=list(
 #'     DOI=c("==","10.25976/ori9-w562"),
 #'     CharacteristicName=c("%in%","Specific conductance","pH"),
-#'     ActivityStartYear=c(">=",2020)
+#'     ActivityStartYear=c(">=",2010)
 #'   )
 #' )
 #'
@@ -37,7 +37,8 @@
 #'   filter=list(
 #'     DOI=c("==","10.25976/ori9-w562"),
 #'     CharacteristicName=c("%in%","Specific conductance","pH"),
-#'     ActivityStartYear=c(">=",2020),
+#'     ActivityStartYear=c(">=",2010),
+#'     ActivityStartYear=c("<=","2024"),
 #'     LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
 #'   )
 #' )

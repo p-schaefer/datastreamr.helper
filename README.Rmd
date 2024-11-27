@@ -82,9 +82,9 @@ qs_helper(
   filter=list(
     DOI=c("==","10.25976/0gvo-9d12"),
     CharacteristicName=c("%in%",c("Specific conductance","pH")),
-    ActivityStartYear=c(">",2010),
     LocationId=c("==","862774"),
-    ActivityStartYear=c("==","2024")
+    ActivityStartYear=c(">=",2010),
+    ActivityStartYear=c("<=","2024")
   ),
   top=5000L
 )
@@ -100,7 +100,7 @@ loc <- DS_helper(
   filter=list(
     DOI=c("==","10.25976/ori9-w562"),
     CharacteristicName=c("%in%",c("Specific conductance","pH")),
-    ActivityStartYear=c(">=",2020)
+    ActivityStartYear=c(">=",2010)
   )
 )
 
@@ -117,7 +117,8 @@ rec <- DS_helper(
   filter=list(
     DOI=c("==","10.25976/ori9-w562"),
     CharacteristicName=c("%in%",c("Specific conductance","pH")),
-    ActivityStartYear=c(">=",2020),
+    ActivityStartYear=c(">=",2010),
+    ActivityStartYear=c("<=","2024"),
     LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
   )
 )
@@ -143,7 +144,8 @@ try(
     filter=list(
       DOI=c("==","10.25976/ori9-w562"),
       CharacteristicName=c("%in%",c("Specific conductance","pH")),
-      ActivityStartYear=c(">=",2020),
+    ActivityStartYear=c(">=",2010),
+    ActivityStartYear=c("<=","2024"),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )
   )
@@ -167,7 +169,8 @@ try(
       Incorrect_Column_Name=c("==","something_wrong"),
       DOI=c("==","10.25976/ori9-w562"),
       CharacteristicName=c("%in%",c("Specific conductance","pH")),
-      ActivityStartYear=c(">=",2020),
+      ActivityStartYear=c(">=",2010),
+      ActivityStartYear=c("<=","2024"),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )
   )
@@ -190,7 +193,8 @@ try(
     filter=list(
       DOI=c("==","10.25976/ori9-w562"),
       CharacteristicName=c("%in%",c("Specific conductance","pH","something_wrong")),
-      ActivityStartYear=c(">=",2020),
+      ActivityStartYear=c(">=",2010),
+      ActivityStartYear=c("<=","2024"),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )
   )

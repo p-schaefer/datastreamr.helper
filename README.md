@@ -108,9 +108,9 @@ qs_helper(
   filter=list(
     DOI=c("==","10.25976/0gvo-9d12"),
     CharacteristicName=c("%in%",c("Specific conductance","pH")),
-    ActivityStartYear=c(">",2010),
     LocationId=c("==","862774"),
-    ActivityStartYear=c("==","2024")
+    ActivityStartYear=c(">=",2010),
+    ActivityStartYear=c("<=","2024")
   ),
   top=5000L
 )
@@ -121,7 +121,7 @@ qs_helper(
 #> [1] 5000
 #> 
 #> $`$filter`
-#> [1] "DOI eq '10.25976/0gvo-9d12' and CharacteristicName in ('Specific conductance', 'pH') and ActivityStartYear gt '2010' and LocationId eq '862774' and ActivityStartYear eq '2024'"
+#> [1] "DOI eq '10.25976/0gvo-9d12' and CharacteristicName in ('Specific conductance', 'pH') and LocationId eq '862774' and ActivityStartYear gte '2010' and ActivityStartYear lte '2024'"
 ```
 
 The `DS_helper()` function will use `qs_helper()` and `DS_valid_vals()`
@@ -139,7 +139,7 @@ loc <- DS_helper(
   filter=list(
     DOI=c("==","10.25976/ori9-w562"),
     CharacteristicName=c("%in%",c("Specific conductance","pH")),
-    ActivityStartYear=c(">=",2020)
+    ActivityStartYear=c(">=",2010)
   )
 )
 
@@ -156,7 +156,8 @@ rec <- DS_helper(
   filter=list(
     DOI=c("==","10.25976/ori9-w562"),
     CharacteristicName=c("%in%",c("Specific conductance","pH")),
-    ActivityStartYear=c(">=",2020),
+    ActivityStartYear=c(">=",2010),
+    ActivityStartYear=c("<=","2024"),
     LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
   )
 )
@@ -195,7 +196,8 @@ try(
     filter=list(
       DOI=c("==","10.25976/ori9-w562"),
       CharacteristicName=c("%in%",c("Specific conductance","pH")),
-      ActivityStartYear=c(">=",2020),
+    ActivityStartYear=c(">=",2010),
+    ActivityStartYear=c("<=","2024"),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )
   )
@@ -221,7 +223,8 @@ try(
       Incorrect_Column_Name=c("==","something_wrong"),
       DOI=c("==","10.25976/ori9-w562"),
       CharacteristicName=c("%in%",c("Specific conductance","pH")),
-      ActivityStartYear=c(">=",2020),
+      ActivityStartYear=c(">=",2010),
+      ActivityStartYear=c("<=","2024"),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )
   )
@@ -246,7 +249,8 @@ try(
     filter=list(
       DOI=c("==","10.25976/ori9-w562"),
       CharacteristicName=c("%in%",c("Specific conductance","pH","something_wrong")),
-      ActivityStartYear=c(">=",2020),
+      ActivityStartYear=c(">=",2010),
+      ActivityStartYear=c("<=","2024"),
       LocationId=c("%in%", loc$Id) # Note 'Id' used here instead of 'ID'
     )
   )
