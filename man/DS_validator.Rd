@@ -4,7 +4,7 @@
 \alias{DS_validator}
 \title{DataStream Schema Validator}
 \usage{
-DS_validator(x, .chunk_size = 1000L)
+DS_validator(x, .chunk_size = 250L)
 }
 \arguments{
 \item{x}{a data frame or file path to a CSV to be uploaded to DataStream}

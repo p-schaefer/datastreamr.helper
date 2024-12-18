@@ -26,7 +26,7 @@
 #' DS_validator(dt_new)
 #'
 
-DS_validator <- function(x,.chunk_size=1000L){
+DS_validator <- function(x,.chunk_size=250L){
 
   x_path<-""
   if (inherits(x,"data.frame")) {
@@ -43,7 +43,7 @@ DS_validator <- function(x,.chunk_size=1000L){
     dt_list <- .format_data(x,sc_sub)
     out <- purrr::map_dfr(dt_list,
                           .id = "Row",
-                          .progress=list(name=paste("Validating rows", pos, "to", pos+length(dt_list))),
+                          .progress=list(name=paste("Validating rows", pos, "to", pos+length(dt_list)-1)),
                           function(x)
                             purrr::map_dfr(sc_sub,
                                            function(y) {
@@ -56,13 +56,21 @@ DS_validator <- function(x,.chunk_size=1000L){
                                              field[field==""] <- field1
                                              field <- gsub("\\/","",field)
 
-                                             tibble::tibble(
+                                             valid_out <- tibble::tibble(
                                                Field=field,
                                                Keyword=out$keyword,
                                                Message=out$message,
                                                Description=out$parentSchema$description
                                              )
 
+                                             if (nrow(valid_out)==0) {
+                                               valid_out <- tibble::tibble(Row=NA_character_,
+                                                                           Field=NA_character_,
+                                                                           Keyword=NA_character_,
+                                                                           Message=NA_character_,
+                                                                           Description=NA_character_)[F,]
+                                             }
+                                             return(valid_out)
                                            }
                             )
     )
@@ -94,6 +102,8 @@ DS_validator <- function(x,.chunk_size=1000L){
       .groups = "drop"
     ) |>
     dplyr::select(Rows,Field,Keyword,Message,Description)
+
+  if (nchar(nchar(valid_out$Rows))>25) valid_out$Rows <- as.list(valid_out$Rows)
 
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
 
