@@ -18,6 +18,12 @@ Imports:
     dplyr,
     httr2,
     jsonlite,
+    jsonvalidate,
     purrr,
+    readr,
     rlist,
+    tibble,
     tidyr
+Remotes: 
+    github::ropensci/jsonvalidate
+    github::datastreamapp/datastreamr

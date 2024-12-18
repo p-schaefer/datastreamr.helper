@@ -101,3 +101,69 @@
 
   return(out)
 }
+
+.load_schema<-function(){
+
+  path <- tempfile()
+  dl <- download.file("https://datastream.org/schema", path,method="auto", quiet =T)
+  scm <- jsonlite::read_json(path)
+
+  scm$allOf <- lapply(scm$allOf,
+                      function(x){
+                        if (!is.null(x$properties)) {
+                          x$properties <- lapply(x$properties,
+                                                 function(xx){
+                                                   if (!is.null(xx$pattern)) {
+                                                     xx <- xx[names(xx)!="pattern"]
+                                                     # xx$pattern <- gsub("^\\^","",xx$pattern)
+                                                     # xx$pattern <- gsub("\\$$","",xx$pattern)
+                                                     # xx$pattern <- gsub("p\\{L\\}","p\\{Letter\\}",xx$pattern)
+                                                     # xx$pattern <- gsub("p\\{N\\}","p\\{Number\\}",xx$pattern)
+                                                     # xx$pattern <- gsub("p\\{P\\}","p\\{Punctuation\\}",xx$pattern)
+                                                     # xx$pattern <- gsub("p\\{S\\}","p\\{Symbol\\}",xx$pattern)
+                                                     # xx$pattern <- gsub("p\\{M\\}","p\\{Mark\\}",xx$pattern)
+                                                     # xx$pattern <- gsub("p\\{Z\\}","p\\{Separator\\}",xx$pattern)
+                                                     # xx$pattern <- gsub("p\\{C\\}","p\\{Other\\}",xx$pattern)
+                                                   }
+                                                   return(xx)
+                                                 })
+                        }
+                        return(x)
+                      })
+
+  sub_sc <- lapply(scm$allOf,
+                   function(x)
+                     suppressWarnings(
+                       jsonvalidate::json_schema$new(
+                         jsonlite::toJSON(x,auto_unbox = T,digits = 999),
+                         strict = F)
+                     )
+  )
+
+  return(sub_sc)
+}
+
+.format_data<-function(x,
+                       sub_sc=NULL
+                       ){
+
+  stopifnot(inherits(x,"data.frame"))
+  if (is.null(sub_sc)) sc_sub <- .load_schema()
+
+  dt_list <- x |>
+    tibble::as_tibble() |>
+    dplyr::mutate(Row=dplyr::row_number()) |>
+    dplyr::group_by(Row) |>
+    dplyr::group_split()
+
+  dt_list <- purrr::map(dt_list,
+                        as.list)
+
+  dt_list <- purrr::map(dt_list,
+                        function(x){
+                          x <- x[!(sapply(x,is.na) | sapply(x,is.null))]
+                          sub_sc[[1]]$serialise(x)
+                        })
+
+  return(dt_list)
+}

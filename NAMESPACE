@@ -3,4 +3,5 @@
 export(DS_helper)
 export(DS_schema_cols)
 export(DS_valid_vals)
+export(DS_validator)
 export(qs_helper)
