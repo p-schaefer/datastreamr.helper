@@ -25,5 +25,5 @@ Imports:
     tibble,
     tidyr
 Remotes: 
-    github::ropensci/jsonvalidate
+    github::ropensci/jsonvalidate,
     github::datastreamapp/datastreamr
