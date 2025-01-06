@@ -103,7 +103,7 @@ DS_validator <- function(x,.chunk_size=250L){
     ) |>
     dplyr::select(Rows,Field,Keyword,Message,Description)
 
-  if (nchar(nchar(valid_out$Rows))>25) valid_out$Rows <- as.list(valid_out$Rows)
+  if (any(nchar(valid_out$Rows))>25) valid_out$Rows <- as.list(valid_out$Rows)
 
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
 
