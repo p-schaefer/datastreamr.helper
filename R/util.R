@@ -167,3 +167,58 @@
 
   return(dt_list)
 }
+
+.schema_download<-function(){
+
+  path <- tempfile(fileext = ".zip")
+  dl <- download.file("https://github.com/datastreamapp/schema/archive/refs/heads/main.zip", path,method="auto", quiet =T)
+
+  path2 <- tempfile(fileext = ".zip")
+  dl <- download.file("https://github.com/datastreamapp/wqx/archive/refs/heads/main.zip", path2,method="auto", quiet =T)
+
+  unzip(path,exdir=file.path(tempdir(),"DataStream"),overwrite = TRUE)
+  unzip(path2,exdir=file.path(tempdir(),"WQX"),overwrite = TRUE)
+
+  dir.create(file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx"),
+             recursive = T,
+             showWarnings = F)
+
+  ft<-file.copy(
+    file.path(tempdir(),"WQX","wqx-main","src"),
+    file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx"),
+    recursive =T
+  )
+
+  ft<-file.rename(
+    file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx","src"),
+    file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx","json-schema")
+  )
+
+
+  fl <- list.files(
+    file.path(tempdir(),"DataStream","schema-main","schemas","data","src"),
+    pattern = "\\.json$",
+    full.names = T,
+    recursive = T
+  )
+
+  for (sc_path in fl) {
+    scm <- jsonlite::read_json(sc_path)
+
+    scm <- rapply(scm, function(x) gsub("^\\.\\/","",x),how ="list")
+    scm <- rapply(scm, function(x) gsub("^\\..\\/","",x),how ="list")
+
+    jsonlite::write_json(scm,
+                         pretty = T,
+                         sc_path,
+                         auto_unbox = T,digits = 999
+    )
+  }
+
+
+  jsonvalidate::json_schema$new(
+    file.path(tempdir(),"DataStream","schema-main/schemas/data/src/primary.json"),
+    strict = F
+    )
+
+}
