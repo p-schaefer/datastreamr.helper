@@ -26,7 +26,7 @@
 #' DS_validator(dt_new)
 #'
 
-DS_validator <- function(x,.chunk_size=250L){
+DS_validator <- function(x,.chunk_size=9999L){
 
   x_path<-""
   if (inherits(x,"data.frame")) {
