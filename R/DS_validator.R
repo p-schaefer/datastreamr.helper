@@ -58,14 +58,19 @@ DS_validator <- function(x,.chunk_size=9999L){
 
                                              valid_out <- tibble::tibble(
                                                Field=field,
+                                               Title=out$parentSchema$title,
                                                Keyword=out$keyword,
                                                Message=out$message,
                                                Description=out$parentSchema$description
                                              )
 
+                                             valid_out <- valid_out |>
+                                               dplyr::mutate(dplyr::across(tidyselect::everything(), ~tidyr::replace_na(.x,"")))|>
+                                               dplyr::summarise(dplyr::across(tidyselect::everything(), ~paste0(.x[.x!=""],collapse = ", ")))
+
                                              if (nrow(valid_out)==0) {
-                                               valid_out <- tibble::tibble(Row=NA_character_,
-                                                                           Field=NA_character_,
+                                               valid_out <- tibble::tibble(Field=NA_character_,
+                                                                           Title=NA_character_,
                                                                            Keyword=NA_character_,
                                                                            Message=NA_character_,
                                                                            Description=NA_character_)[F,]
@@ -90,18 +95,19 @@ DS_validator <- function(x,.chunk_size=9999L){
   if (nrow(valid_out)==0) {
     valid_out <- tibble::tibble(Row=NA_character_,
                                 Field=NA_character_,
+                                Title=NA_character_,
                                 Keyword=NA_character_,
                                 Message=NA_character_,
                                 Description=NA_character_)[F,]
   }
 
   valid_out <- valid_out |>
-    dplyr::group_by(Field,Keyword,Message,Description) |>
+    dplyr::group_by(Field,Title,Keyword,Message,Description) |>
     dplyr::summarise(
       Rows=paste0(Row,collapse = ", "),
       .groups = "drop"
     ) |>
-    dplyr::select(Rows,Field,Keyword,Message,Description)
+    dplyr::select(Rows,Field,Title,Keyword,Message,Description)
 
   if (any(nchar(valid_out$Rows)>25)) valid_out$Rows <- as.list(valid_out$Rows)
 
