@@ -72,8 +72,8 @@ DS_validator <- function(x,.chunk_size=9999L){
                                                )
 
                                                valid_out <- tidyr::fill(valid_out,
-                                                                        Title,Keyword,Message,Description,
-                                                                        .directions="downup")
+                                                                        Title,Description,
+                                                                        .direction="downup")
 
                                                # valid_out <- valid_out |>
                                                #   dplyr::mutate(dplyr::across(tidyselect::everything(), ~tidyr::replace_na(.x,""))) |>
