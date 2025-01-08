@@ -71,6 +71,10 @@ DS_validator <- function(x,.chunk_size=9999L){
                                                  Description=out$parentSchema$description
                                                )
 
+                                               valid_out <- tidyr::fill(valid_out,
+                                                                        Title,Keyword,Message,Description,
+                                                                        .directions="downup")
+
                                                # valid_out <- valid_out |>
                                                #   dplyr::mutate(dplyr::across(tidyselect::everything(), ~tidyr::replace_na(.x,""))) |>
                                                #   dplyr::summarise(dplyr::across(tidyselect::everything(), ~paste0(unique(.x[.x!=""]),collapse = ", ")))
@@ -114,6 +118,7 @@ DS_validator <- function(x,.chunk_size=9999L){
   valid_out$Rows <- as.list(valid_out$Rows)
 
   valid_out <- valid_out[valid_out$Message != "must match a schema in anyOf",]
+  valid_out <- valid_out[valid_out$Message != "must match \"then\" schema",]
 
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
 
