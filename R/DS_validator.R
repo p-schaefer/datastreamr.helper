@@ -66,7 +66,7 @@ DS_validator <- function(x,.chunk_size=9999L){
 
                                              valid_out <- valid_out |>
                                                dplyr::mutate(dplyr::across(tidyselect::everything(), ~tidyr::replace_na(.x,"")))|>
-                                               dplyr::summarise(dplyr::across(tidyselect::everything(), ~paste0(.x[.x!=""],collapse = ", ")))
+                                               dplyr::summarise(dplyr::across(tidyselect::everything(), ~paste0(unique(.x[.x!=""]),collapse = ", ")))
 
                                              if (nrow(valid_out)==0) {
                                                valid_out <- tibble::tibble(Field=NA_character_,
@@ -104,12 +104,12 @@ DS_validator <- function(x,.chunk_size=9999L){
   valid_out <- valid_out |>
     dplyr::group_by(Field,Title,Keyword,Message,Description) |>
     dplyr::summarise(
-      Rows=paste0(Row,collapse = ", "),
+      Rows=paste0(unique(Row),collapse = ", "),
       .groups = "drop"
     ) |>
     dplyr::select(Rows,Field,Title,Keyword,Message,Description)
 
-  if (any(nchar(valid_out$Rows)>25)) valid_out$Rows <- as.list(valid_out$Rows)
+  valid_out$Rows <- as.list(valid_out$Rows)
 
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
 
