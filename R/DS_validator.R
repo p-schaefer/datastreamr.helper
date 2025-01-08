@@ -113,6 +113,8 @@ DS_validator <- function(x,.chunk_size=9999L){
 
   valid_out$Rows <- as.list(valid_out$Rows)
 
+  valid_out <- valid_out[valid_out$Message != "must match a schema in anyOf",]
+
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
 
   return(valid_out)
