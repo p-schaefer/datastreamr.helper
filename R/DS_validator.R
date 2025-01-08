@@ -72,7 +72,7 @@ DS_validator <- function(x,.chunk_size=9999L){
                                                )
 
                                                valid_out <- tidyr::fill(valid_out,
-                                                                        Title,Description,
+                                                                        tidyselect::any_of(c("Title", "Description")),
                                                                         .direction="downup")
 
                                                # valid_out <- valid_out |>
@@ -108,7 +108,7 @@ DS_validator <- function(x,.chunk_size=9999L){
   }
 
   valid_out <- valid_out |>
-    dplyr::group_by(Field,Title,Keyword,Message,Description) |>
+    dplyr::group_by(Title,Description,Message,Field,Keyword) |>
     dplyr::summarise(
       Rows=paste0(unique(Row),collapse = ", "),
       .groups = "drop"
