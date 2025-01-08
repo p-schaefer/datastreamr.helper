@@ -47,34 +47,36 @@ DS_validator <- function(x,.chunk_size=9999L){
                           function(x)
                             purrr::map_dfr(sc_sub,
                                            function(y) {
+                                             valid_out <- tibble::tibble(Field=NA_character_,
+                                                                         Title=NA_character_,
+                                                                         Keyword=NA_character_,
+                                                                         Message=NA_character_,
+                                                                         Description=NA_character_)[F,]
+
                                              out <- y$validate(x,verbose=T,greedy =T)
                                              out <- attr(out,"errors")
 
-                                             field <- out$instancePath
-                                             field1 <- out$params$missingProperty[out$instancePath==""]
-                                             if (is.null(field1)) field1 <- ""
-                                             field[field==""] <- field1
-                                             field <- gsub("\\/","",field)
+                                             if (!is.null(out)) {
+                                               field <- out$instancePath
+                                               field1 <- out$params$missingProperty[out$instancePath==""]
+                                               if (is.null(field1)) field1 <- ""
+                                               field[field==""] <- field1
+                                               field <- gsub("\\/","",field)
 
-                                             valid_out <- tibble::tibble(
-                                               Field=field,
-                                               Title=out$parentSchema$title,
-                                               Keyword=out$keyword,
-                                               Message=out$message,
-                                               Description=out$parentSchema$description
-                                             )
+                                               valid_out <- tibble::tibble(
+                                                 Field=field,
+                                                 Title=out$parentSchema$title,
+                                                 Keyword=out$keyword,
+                                                 Message=out$message,
+                                                 Description=out$parentSchema$description
+                                               )
 
-                                             valid_out <- valid_out |>
-                                               dplyr::mutate(dplyr::across(tidyselect::everything(), ~tidyr::replace_na(.x,"")))|>
-                                               dplyr::summarise(dplyr::across(tidyselect::everything(), ~paste0(unique(.x[.x!=""]),collapse = ", ")))
+                                               # valid_out <- valid_out |>
+                                               #   dplyr::mutate(dplyr::across(tidyselect::everything(), ~tidyr::replace_na(.x,""))) |>
+                                               #   dplyr::summarise(dplyr::across(tidyselect::everything(), ~paste0(unique(.x[.x!=""]),collapse = ", ")))
 
-                                             if (nrow(valid_out)==0) {
-                                               valid_out <- tibble::tibble(Field=NA_character_,
-                                                                           Title=NA_character_,
-                                                                           Keyword=NA_character_,
-                                                                           Message=NA_character_,
-                                                                           Description=NA_character_)[F,]
                                              }
+
                                              return(valid_out)
                                            }
                             )
