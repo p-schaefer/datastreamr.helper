@@ -123,6 +123,7 @@ DS_validator <- function(x,.chunk_size=9999L){
 
   valid_out <- valid_out[valid_out$Message != "must match a schema in anyOf",]
   valid_out <- valid_out[valid_out$Message != "must match \"then\" schema",]
+  valid_out <- valid_out[valid_out$Keyword != "pattern",]
   valid_out <- valid_out[!grepl("OWASP ASVS",valid_out$Description),]
 
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
