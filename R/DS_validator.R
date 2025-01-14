@@ -37,10 +37,14 @@ DS_validator <- function(x,.chunk_size=9999L){
 
   if (!file.exists(x)) stop("File 'x' doesn't exist, or the file path is specified incorrectly")
 
-  sc_sub <- .load_schema()
+  sc_sub1 <- .load_schema()
+  sc_sub2 <- .schema_qc()
+
+  sc_sub <- c(sc_sub1,sc_sub2)
 
   callback <- readr::DataFrameCallback$new(function(x, pos) {
     dt_list <- .format_data(x,sc_sub)
+
     out <- purrr::map_dfr(dt_list,
                           .id = "Row",
                           .progress=list(name=paste("Validating rows", pos, "to", pos+length(dt_list)-1)),
@@ -119,6 +123,7 @@ DS_validator <- function(x,.chunk_size=9999L){
 
   valid_out <- valid_out[valid_out$Message != "must match a schema in anyOf",]
   valid_out <- valid_out[valid_out$Message != "must match \"then\" schema",]
+  valid_out <- valid_out[!grepl("OWASP ASVS",valid_out$Description),]
 
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
 
