@@ -114,16 +114,16 @@
                           x$properties <- lapply(x$properties,
                                                  function(xx){
                                                    if (!is.null(xx$pattern)) {
-                                                     xx <- xx[names(xx)!="pattern"]
-                                                     # xx$pattern <- gsub("^\\^","",xx$pattern)
-                                                     # xx$pattern <- gsub("\\$$","",xx$pattern)
-                                                     # xx$pattern <- gsub("p\\{L\\}","p\\{Letter\\}",xx$pattern)
-                                                     # xx$pattern <- gsub("p\\{N\\}","p\\{Number\\}",xx$pattern)
-                                                     # xx$pattern <- gsub("p\\{P\\}","p\\{Punctuation\\}",xx$pattern)
-                                                     # xx$pattern <- gsub("p\\{S\\}","p\\{Symbol\\}",xx$pattern)
-                                                     # xx$pattern <- gsub("p\\{M\\}","p\\{Mark\\}",xx$pattern)
-                                                     # xx$pattern <- gsub("p\\{Z\\}","p\\{Separator\\}",xx$pattern)
-                                                     # xx$pattern <- gsub("p\\{C\\}","p\\{Other\\}",xx$pattern)
+                                                     #xx <- xx[names(xx)!="pattern"]
+                                                     xx$pattern <- gsub("^\\^","",xx$pattern)
+                                                     xx$pattern <- gsub("\\$$","",xx$pattern)
+                                                     xx$pattern <- gsub("p\\{L\\}","p\\{Letter\\}",xx$pattern)
+                                                     xx$pattern <- gsub("p\\{N\\}","p\\{Number\\}",xx$pattern)
+                                                     xx$pattern <- gsub("p\\{P\\}","p\\{Punctuation\\}",xx$pattern)
+                                                     xx$pattern <- gsub("p\\{S\\}","p\\{Symbol\\}",xx$pattern)
+                                                     xx$pattern <- gsub("p\\{M\\}","p\\{Mark\\}",xx$pattern)
+                                                     xx$pattern <- gsub("p\\{Z\\}","p\\{Separator\\}",xx$pattern)
+                                                     xx$pattern <- gsub("p\\{C\\}","p\\{Other\\}",xx$pattern)
                                                    }
                                                    return(xx)
                                                  })
@@ -315,16 +315,31 @@
   # sub_sc <- substitute_refs(sub_sc,rep_list)
   # sub_sc <- substitute_refs(sub_sc,rep_list3)
   # sub_sc <- substitute_refs(sub_sc,rep_list)
-  #sub_sc <- sub_sc[names(sub_sc)!="$vocabulary"]
-  sub_sc <- rapply(sub_sc,
-                   function(x) {
-                     if (is.list(x)) return(x)
-                     if (x=="TRUE") return(TRUE)
-                     if (x=="FALSE") return(FALSE)
-                     if (is.na(as.numeric(x))) return(x)
-                     return(as.numeric(x))
-                   },
-                   how ="list")
+  # #sub_sc <- sub_sc[names(sub_sc)!="$vocabulary"]
+  # sub_sc <- rapply(sub_sc,
+  #                  function(x) {
+  #                    if (is.list(x) & length(x)==0) return(NULL)
+  #                    if (is.list(x)) return(x)
+  #                    if (length(x)>1) return(x)
+  #                    if (x=="TRUE") return(TRUE)
+  #                    if (x=="FALSE") return(FALSE)
+  #                    #if (length(x)==1) return(as.list(x))
+  #                    if (is.na(as.numeric(x))) return(x)
+  #                    return(as.numeric(x))
+  #                  },
+  #                  how ="list")
+  #
+  # sub_sc$allOf <- lapply(sub_sc$allOf,function(x) {
+  #   #browser()
+  #   if (length(x$required)==0) x$required<-c()
+  #   if (any(names(x) %in% c("if","then"))){
+  #     for (i in c("if","then")){
+  #       if (length(x[[i]]$required)==0) x[[i]]$required<-c()
+  #     }
+  #   }
+  #   return(x)
+  # })
+
   sub_sc <- jsonlite::toJSON(sub_sc,auto_unbox = T,digits = 999)
   json1 <- jsonvalidate::json_schema$new(
     sub_sc,
@@ -334,14 +349,14 @@
   sub_sc <- lapply(fl2,function(path){
     sub_sc <- jsonlite::read_json(path)
     sub_sc <- substitute_refs(sub_sc,rep_list)
-    sub_sc <- rapply(sub_sc,
-                     function(x) {
-                       if (x=="TRUE") return(TRUE)
-                       if (x=="FALSE") return(FALSE)
-                       if (is.na(as.numeric(x))) return(x)
-                       return(as.numeric(x))
-                     },
-                     how ="list")
+    # sub_sc <- rapply(sub_sc,
+    #                  function(x) {
+    #                    if (x=="TRUE") return(TRUE)
+    #                    if (x=="FALSE") return(FALSE)
+    #                    if (is.na(as.numeric(x))) return(x)
+    #                    return(as.numeric(x))
+    #                  },
+    #                  how ="list")
     sub_sc <- jsonlite::toJSON(sub_sc,auto_unbox = T,digits = 999)
 
     jsonvalidate::json_schema$new(
@@ -349,6 +364,8 @@
       strict = F
     )
   })
+
+  sub_sc <- c(json1,sub_sc)
 
   return(sub_sc)
 

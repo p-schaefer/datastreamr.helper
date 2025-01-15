@@ -67,12 +67,20 @@ DS_validator <- function(x,.chunk_size=9999L){
                                                field[field==""] <- field1
                                                field <- gsub("\\/","",field)
 
+                                               Title <- out$parentSchema$title
+                                               Title1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"title",.default=NA_character_))
+                                               if (!all(is.na(Title1)) & is.null(Title)) Title <- Title1
+
+                                               Description <- out$parentSchema$description
+                                               Description1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"description",.default=NA_character_))
+                                               if (!all(is.na(Description1)) & is.null(Description)) Description <- Description1
+
                                                valid_out <- tibble::tibble(
                                                  Field=field,
-                                                 Title=out$parentSchema$title,
+                                                 Title=Title,
                                                  Keyword=out$keyword,
                                                  Message=out$message,
-                                                 Description=out$parentSchema$description
+                                                 Description=Description
                                                )
 
                                                valid_out <- tidyr::fill(valid_out,
