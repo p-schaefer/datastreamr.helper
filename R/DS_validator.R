@@ -64,59 +64,61 @@ DS_validator <- function(x,
       .progress = T,
       .options = furrr::furrr_options(globals = F,seed =T),
       function(xx,yy){
-        purrr::map_dfr(yy,
-                       function(y) {
+        purrr::map_dfr(
+          yy,
+          function(y) {
 
-                         y <- jsonvalidate::json_schema$new(
-                           y,
-                           strict = F
-                         )
+            y <- jsonvalidate::json_schema$new(
+              y,
+              strict = F
+            )
 
-                         purrr::map_dfr(xx,
-                                        .id = "Row",
-                                        function(x){
+            purrr::map_dfr(
+              xx,
+              .id = "Row",
+              function(x){
 
-                                          valid_out <- tibble::tibble(Field=NA_character_,
-                                                                      Title=NA_character_,
-                                                                      Keyword=NA_character_,
-                                                                      Message=NA_character_,
-                                                                      Description=NA_character_)[F,]
+                valid_out <- tibble::tibble(Field=NA_character_,
+                                            Title=NA_character_,
+                                            Keyword=NA_character_,
+                                            Message=NA_character_,
+                                            Description=NA_character_)[F,]
 
-                                          out <- y$validate(x,verbose=T,greedy =T)
-                                          out <- attr(out,"errors")
+                out <- y$validate(x,verbose=T,greedy =T)
+                out <- attr(out,"errors")
 
-                                          if (!is.null(out)) {
-                                            field <- out$instancePath
-                                            field1 <- out$params$missingProperty[out$instancePath==""]
-                                            if (is.null(field1)) field1 <- ""
-                                            field[field==""] <- field1
-                                            field <- gsub("\\/","",field)
+                if (!is.null(out)) {
+                  field <- out$instancePath
+                  field1 <- out$params$missingProperty[out$instancePath==""]
+                  if (is.null(field1)) field1 <- ""
+                  field[field==""] <- field1
+                  field <- gsub("\\/","",field)
 
-                                            Title <- out$parentSchema$title
-                                            Title1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"title",.default=NA_character_))
-                                            if (!all(is.na(Title1)) & is.null(Title)) Title <- Title1
+                  Title <- out$parentSchema$title
+                  Title1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"title",.default=NA_character_))
+                  if (!all(is.na(Title1)) & is.null(Title)) Title <- Title1
 
-                                            Description <- out$parentSchema$description
-                                            Description1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"description",.default=NA_character_))
-                                            if (!all(is.na(Description1)) & is.null(Description)) Description <- Description1
+                  Description <- out$parentSchema$description
+                  Description1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"description",.default=NA_character_))
+                  if (!all(is.na(Description1)) & is.null(Description)) Description <- Description1
 
-                                            valid_out <- tibble::tibble(
-                                              Field=field,
-                                              Title=Title,
-                                              Keyword=out$keyword,
-                                              Message=out$message,
-                                              Description=Description
-                                            )
+                  valid_out <- tibble::tibble(
+                    Field=field,
+                    Title=Title,
+                    Keyword=out$keyword,
+                    Message=out$message,
+                    Description=Description
+                  )
 
-                                            valid_out <- tidyr::fill(valid_out,
-                                                                     tidyselect::any_of(c("Title", "Description")),
-                                                                     .direction="downup")
+                  valid_out <- tidyr::fill(valid_out,
+                                           tidyselect::any_of(c("Title", "Description")),
+                                           .direction="downup")
 
-                                          }
+                }
 
-                                          return(valid_out)
-                                        })
-                       })
+                return(valid_out)
+              })
+          })
       })
 
     out$Row <- as.numeric(out$Row) + pos - 1
