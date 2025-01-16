@@ -2,9 +2,10 @@
 #'
 #' Validate supplied data frame against DataStream Schema: https://datastream.org/schema
 #'
-#' Schema checks related to pattern matching are currently unavailable. Function will save data frame to a temporary file internally.
+#' Function will save *x* to a temporary file internally.
 #'
 #' @param x a data frame or file path to a CSV to be uploaded to DataStream
+#' @param ncores NULL or an integer indicating the number of cores
 #' @param .chunk_size an integer indicating the number of rows to read into R at a time
 #'
 #' @returns a data frame of error messages from schema validation
@@ -26,7 +27,13 @@
 #' DS_validator(dt_new)
 #'
 
-DS_validator <- function(x,.chunk_size=9999L){
+DS_validator <- function(x,
+                         ncores = NULL,
+                         .chunk_size=9999L){
+
+  if (!is.null(ncores)){
+    future::plan(future::multisession(workers = ncores))
+  }
 
   x_path<-""
   if (inherits(x,"data.frame")) {
@@ -45,58 +52,72 @@ DS_validator <- function(x,.chunk_size=9999L){
   callback <- readr::DataFrameCallback$new(function(x, pos) {
     dt_list <- .format_data(x,sc_sub)
 
-    out <- purrr::map_dfr(dt_list,
-                          .id = "Row",
-                          .progress=list(name=paste("Validating rows", pos, "to", pos+length(dt_list)-1)),
-                          function(x)
-                            purrr::map_dfr(sc_sub,
-                                           function(y) {
-                                             valid_out <- tibble::tibble(Field=NA_character_,
-                                                                         Title=NA_character_,
-                                                                         Keyword=NA_character_,
-                                                                         Message=NA_character_,
-                                                                         Description=NA_character_)[F,]
+    nw <- future::nbrOfWorkers()
 
-                                             out <- y$validate(x,verbose=T,greedy =T)
-                                             out <- attr(out,"errors")
+    dt_list_split <- suppressWarnings(split(dt_list, rep(1:nw,each=ceiling(length(dt_list)/nw))))
+    schema_split <- lapply(sc_sub,function(x) x$schema$schema)
+    schema_split <- rep(list(schema_split),nw)
 
-                                             if (!is.null(out)) {
-                                               field <- out$instancePath
-                                               field1 <- out$params$missingProperty[out$instancePath==""]
-                                               if (is.null(field1)) field1 <- ""
-                                               field[field==""] <- field1
-                                               field <- gsub("\\/","",field)
+    out <- furrr::future_map2_dfr(
+      dt_list_split,
+      schema_split,
+      .progress = T,
+      .options = furrr::furrr_options(globals = F,seed =T),
+      function(xx,yy){
+        purrr::map_dfr(yy,
+                       function(y) {
 
-                                               Title <- out$parentSchema$title
-                                               Title1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"title",.default=NA_character_))
-                                               if (!all(is.na(Title1)) & is.null(Title)) Title <- Title1
+                         y <- jsonvalidate::json_schema$new(
+                           y,
+                           strict = F
+                         )
 
-                                               Description <- out$parentSchema$description
-                                               Description1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"description",.default=NA_character_))
-                                               if (!all(is.na(Description1)) & is.null(Description)) Description <- Description1
+                         purrr::map_dfr(xx,
+                                        .id = "Row",
+                                        function(x){
 
-                                               valid_out <- tibble::tibble(
-                                                 Field=field,
-                                                 Title=Title,
-                                                 Keyword=out$keyword,
-                                                 Message=out$message,
-                                                 Description=Description
-                                               )
+                                          valid_out <- tibble::tibble(Field=NA_character_,
+                                                                      Title=NA_character_,
+                                                                      Keyword=NA_character_,
+                                                                      Message=NA_character_,
+                                                                      Description=NA_character_)[F,]
 
-                                               valid_out <- tidyr::fill(valid_out,
-                                                                        tidyselect::any_of(c("Title", "Description")),
-                                                                        .direction="downup")
+                                          out <- y$validate(x,verbose=T,greedy =T)
+                                          out <- attr(out,"errors")
 
-                                               # valid_out <- valid_out |>
-                                               #   dplyr::mutate(dplyr::across(tidyselect::everything(), ~tidyr::replace_na(.x,""))) |>
-                                               #   dplyr::summarise(dplyr::across(tidyselect::everything(), ~paste0(unique(.x[.x!=""]),collapse = ", ")))
+                                          if (!is.null(out)) {
+                                            field <- out$instancePath
+                                            field1 <- out$params$missingProperty[out$instancePath==""]
+                                            if (is.null(field1)) field1 <- ""
+                                            field[field==""] <- field1
+                                            field <- gsub("\\/","",field)
 
-                                             }
+                                            Title <- out$parentSchema$title
+                                            Title1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"title",.default=NA_character_))
+                                            if (!all(is.na(Title1)) & is.null(Title)) Title <- Title1
 
-                                             return(valid_out)
-                                           }
-                            )
-    )
+                                            Description <- out$parentSchema$description
+                                            Description1 <- sapply(out$parentSchema,function(x) purrr::pluck(x,"description",.default=NA_character_))
+                                            if (!all(is.na(Description1)) & is.null(Description)) Description <- Description1
+
+                                            valid_out <- tibble::tibble(
+                                              Field=field,
+                                              Title=Title,
+                                              Keyword=out$keyword,
+                                              Message=out$message,
+                                              Description=Description
+                                            )
+
+                                            valid_out <- tidyr::fill(valid_out,
+                                                                     tidyselect::any_of(c("Title", "Description")),
+                                                                     .direction="downup")
+
+                                          }
+
+                                          return(valid_out)
+                                        })
+                       })
+      })
 
     out$Row <- as.numeric(out$Row) + pos - 1
 
@@ -135,6 +156,8 @@ DS_validator <- function(x,.chunk_size=9999L){
   valid_out <- valid_out[!grepl("OWASP ASVS",valid_out$Description),]
 
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
+
+  future::plan(future::sequential)
 
   return(valid_out)
 }

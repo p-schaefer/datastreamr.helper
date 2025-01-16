@@ -4,10 +4,12 @@
 \alias{DS_validator}
 \title{DataStream Schema Validator}
 \usage{
-DS_validator(x, .chunk_size = 250L)
+DS_validator(x, ncores = NULL, .chunk_size = 9999L)
 }
 \arguments{
 \item{x}{a data frame or file path to a CSV to be uploaded to DataStream}
+
+\item{ncores}{NULL or an integer indicating the number of cores}
 
 \item{.chunk_size}{an integer indicating the number of rows to read into R at a time}
 }
@@ -18,7 +20,7 @@ a data frame of error messages from schema validation
 Validate supplied data frame against DataStream Schema: https://datastream.org/schema
 }
 \details{
-Schema checks related to pattern matching are currently unavailable. Function will save data frame to a temporary file internally.
+Function will save \emph{x} to a temporary file internally.
 }
 \examples{
 dt <- tibble::tribble(
