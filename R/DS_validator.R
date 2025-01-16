@@ -159,7 +159,9 @@ DS_validator <- function(x,
 
   fr <- suppressWarnings(file.remove(x_path,showWarnings = F))
 
-  future::plan(future::sequential)
+  if (!is.null(ncores)){
+    future::plan(future::sequential)
+  }
 
   return(valid_out)
 }
