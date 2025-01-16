@@ -16,6 +16,8 @@ BugReports: https://github.com/p-schaefer/datastreamr.helper/issues
 Imports: 
     datastreamr,
     dplyr,
+    furrr,
+    future,
     httr2,
     jsonlite,
     jsonvalidate,
