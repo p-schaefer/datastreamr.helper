@@ -32,7 +32,7 @@ DS_validator <- function(x,
                          .chunk_size=9999L){
 
   if (!is.null(ncores)){
-    future::plan(future::multisession(workers = ncores))
+    future::plan(future::multisession, workers = ncores)
   }
 
   x_path<-""
@@ -43,6 +43,7 @@ DS_validator <- function(x,
   }
 
   if (!file.exists(x)) stop("File 'x' doesn't exist, or the file path is specified incorrectly")
+  data_nrow <- nrow(data.table::fread(x, select = 1L))
 
   sc_sub1 <- .load_schema()
   sc_sub2 <- .schema_qc()
@@ -61,12 +62,13 @@ DS_validator <- function(x,
     out <- furrr::future_map2_dfr(
       dt_list_split,
       schema_split,
-      .progress = T,
+      .progress = F,
       .options = furrr::furrr_options(globals = F,seed =T),
       function(xx,yy){
         purrr::map_dfr(
           yy,
           function(y) {
+            p()
 
             y <- jsonvalidate::json_schema$new(
               y,
@@ -75,10 +77,10 @@ DS_validator <- function(x,
 
             purrr::map_dfr(
               xx,
-              .id = "Row",
               function(x){
 
-                valid_out <- tibble::tibble(Field=NA_character_,
+                valid_out <- tibble::tibble(Row=NA_integer_,
+                                            Field=NA_character_,
                                             Title=NA_character_,
                                             Keyword=NA_character_,
                                             Message=NA_character_,
@@ -103,6 +105,7 @@ DS_validator <- function(x,
                   if (!all(is.na(Description1)) & is.null(Description)) Description <- Description1
 
                   valid_out <- tibble::tibble(
+                    Row=jsonlite::fromJSON(x)$Row,
                     Field=field,
                     Title=Title,
                     Keyword=out$keyword,
@@ -126,12 +129,23 @@ DS_validator <- function(x,
     return(out)
   })
 
-  valid_out <- readr::read_csv_chunked(x,
-                                       callback = callback,
-                                       show_col_types = F,
-                                       #col_types = readr::cols(.default = "c"),
-                                       chunk_size = .chunk_size,
-                                       progress = T)
+  progressr::with_progress(
+    handlers = progressr::handlers(progressr::handler_cli),
+    {
+      p <- progressr::progressor(
+        steps = data_nrow,
+        message =paste0("Validating ",data_nrow," Rows")
+
+      )
+
+      valid_out <- readr::read_csv_chunked(x,
+                                           callback = callback,
+                                           show_col_types = F,
+                                           #col_types = readr::cols(.default = "c"),
+                                           chunk_size = .chunk_size,
+                                           progress = F)
+    })
+
 
   if (nrow(valid_out)==0) {
     valid_out <- tibble::tibble(Row=NA_character_,

@@ -104,8 +104,10 @@
 
 .load_schema<-function(){
 
-  path <- tempfile()
-  dl <- download.file("https://datastream.org/schema", path,method="auto", quiet =T)
+  path <- file.path(tempdir(),"DataStream_Schema")
+  if (Sys.getenv(".load_schema")=="") {
+    dl <- download.file("https://datastream.org/schema", path, method="auto", quiet =T)
+  }
   scm <- jsonlite::read_json(path)
 
   scm$allOf <- lapply(scm$allOf,
@@ -139,6 +141,8 @@
                          strict = F)
                      )
   )
+
+  Sys.setenv(".load_schema"=T)
 
   return(sub_sc)
 }
@@ -226,31 +230,33 @@
     }
   }
 
-  path <- tempfile(fileext = ".zip")
-  dl <- download.file("https://github.com/datastreamapp/schema/archive/refs/heads/main.zip", path,method="auto", quiet =T)
+  if (Sys.getenv(".schema_qc")=="") {
+    path <- tempfile(fileext = ".zip")
+    dl <- download.file("https://github.com/datastreamapp/schema/archive/refs/heads/main.zip", path,method="auto", quiet =T)
 
-  path2 <- tempfile(fileext = ".zip")
-  dl <- download.file("https://github.com/datastreamapp/wqx/archive/refs/heads/main.zip", path2,method="auto", quiet =T)
+    path2 <- tempfile(fileext = ".zip")
+    dl <- download.file("https://github.com/datastreamapp/wqx/archive/refs/heads/main.zip", path2,method="auto", quiet =T)
 
-  unzip(path,exdir=file.path(tempdir(),"DataStream"),overwrite = TRUE)
-  unzip(path2,exdir=file.path(tempdir(),"WQX"),overwrite = TRUE)
+    unzip(path,exdir=file.path(tempdir(),"DataStream"),overwrite = TRUE)
+    unzip(path2,exdir=file.path(tempdir(),"WQX"),overwrite = TRUE)
 
-  dir.create(file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx"),
-             recursive = T,
-             showWarnings = F)
+    dir.create(file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx"),
+               recursive = T,
+               showWarnings = F)
 
-  ft <- file.copy(
-    file.path(tempdir(),"WQX","wqx-main","src"),
-    file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx"),
-    recursive = T,
-    overwrite = T
-  )
+    ft <- file.copy(
+      file.path(tempdir(),"WQX","wqx-main","src"),
+      file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx"),
+      recursive = T,
+      overwrite = T
+    )
 
-  ft <- file.rename(
-    file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx","src"),
-    file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx","json-schema")
-  )
+    ft <- file.rename(
+      file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx","src"),
+      file.path(tempdir(),"DataStream","schema-main","schemas","data","src","node_modules","wqx","json-schema")
+    )
 
+  }
 
   fl <- list.files(
     file.path(tempdir(),"DataStream","schema-main","schemas","data","src"),
@@ -366,6 +372,8 @@
   })
 
   sub_sc <- c(json1,sub_sc)
+
+  Sys.setenv(".schema_qc"=T)
 
   return(sub_sc)
 
