@@ -43,7 +43,6 @@ DS_validator <- function(x,
   }
 
   if (!file.exists(x)) stop("File 'x' doesn't exist, or the file path is specified incorrectly")
-  data_nrow <- nrow(data.table::fread(x, select = 1L))
 
   sc_sub1 <- .load_schema()
   sc_sub2 <- .schema_qc()
@@ -68,7 +67,6 @@ DS_validator <- function(x,
         purrr::map_dfr(
           yy,
           function(y) {
-            p()
 
             y <- jsonvalidate::json_schema$new(
               y,
@@ -129,22 +127,12 @@ DS_validator <- function(x,
     return(out)
   })
 
-  progressr::with_progress(
-    handlers = progressr::handlers(progressr::handler_cli),
-    {
-      p <- progressr::progressor(
-        steps = data_nrow,
-        message =paste0("Validating ",data_nrow," Rows")
-
-      )
-
-      valid_out <- readr::read_csv_chunked(x,
-                                           callback = callback,
-                                           show_col_types = F,
-                                           #col_types = readr::cols(.default = "c"),
-                                           chunk_size = .chunk_size,
-                                           progress = F)
-    })
+  valid_out <- readr::read_csv_chunked(x,
+                                       callback = callback,
+                                       show_col_types = F,
+                                       #col_types = readr::cols(.default = "c"),
+                                       chunk_size = .chunk_size,
+                                       progress = T)
 
 
   if (nrow(valid_out)==0) {
